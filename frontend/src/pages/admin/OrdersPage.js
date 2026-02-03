@@ -201,7 +201,7 @@ const OrdersPage = () => {
                   >
                     <Download className="w-5 h-5" />
                     Download Invoice
-                  </button>
+                  </a>
                 )}
               </div>
             ))}
