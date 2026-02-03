@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import DashboardLayout from '../components/DashboardLayout';
+import DashboardLayout from '../../components/DashboardLayout';
 import { 
   LayoutDashboard, Users, Store, FolderOpen, Package, 
   ShoppingCart, CreditCard, Settings, FileText, Bell 
 } from 'lucide-react';
-import api from '../services/api';
+import api from '../../services/api';
 
 const SuperAdminDashboard = () => {
   const [stats, setStats] = useState(null);
