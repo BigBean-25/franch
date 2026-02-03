@@ -754,11 +754,11 @@ async def approve_order(
     
     # Check if credit exhausted
     if new_available_credit <= 0:
-        await notify_credit_exhausted(db, franchise["name"], franchise["email"])
+        await notify_credit_exhausted(db, franchise["name"], franchise["email"], franchise.get("phone"))
     
     # Send notification
     order["invoice_number"] = invoice_number
-    await notify_order_approved(db, order, franchise["email"])
+    await notify_order_approved(db, order, franchise["email"], franchise.get("phone"))
     
     # Audit log
     await log_audit(db, current_user["id"], current_user["email"], "APPROVE_ORDER", "orders", f"Approved order {order['order_number']}")
