@@ -264,6 +264,20 @@ const ProductsPage = () => {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-coffee-800 mb-1">Image URL</label>
+                  <input
+                    type="url"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    className="w-full px-3 py-2 border border-coffee-200 rounded-lg focus:ring-2 focus:ring-coffee-500"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {formData.image_url && (
+                    <img src={formData.image_url} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded border border-coffee-200" onError={(e) => e.target.style.display='none'} />
+                  )}
+                </div>
+
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-coffee-800 mb-1">Original Price</label>
