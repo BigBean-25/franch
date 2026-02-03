@@ -1,14 +1,13 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch, mm
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, KeepTogether
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT, TA_JUSTIFY
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from reportlab.lib import colors
 from datetime import datetime
 import os
 from pathlib import Path
 import requests
-from io import BytesIO
 
 INVOICE_DIR = Path("/app/backend/invoices")
 INVOICE_DIR.mkdir(exist_ok=True)
@@ -37,13 +36,12 @@ def download_logo():
 
 def generate_invoice_pdf(invoice_data: dict, company_settings: dict) -> str:
     """
-    Generate professional invoice PDF with logo and return the file path
+    Generate professional invoice PDF with logo in corner
     """
     
     filename = f"BBC-INV-{invoice_data['invoice_number']}.pdf"
     filepath = INVOICE_DIR / filename
     
-    # Create PDF with margins
     doc = SimpleDocTemplate(
         str(filepath), 
         pagesize=A4,
@@ -57,43 +55,32 @@ def generate_invoice_pdf(invoice_data: dict, company_settings: dict) -> str:
     styles = getSampleStyleSheet()
     
     # Custom styles
-    title_style = ParagraphStyle(
-        'CustomTitle',
+    company_name_style = ParagraphStyle(
+        'CompanyName',
         parent=styles['Heading1'],
-        fontSize=28,
+        fontSize=24,
         textColor=HEADER_BG,
-        spaceAfter=5,
-        alignment=TA_CENTER,
-        fontName='Helvetica-Bold'
+        spaceAfter=3,
+        fontName='Helvetica-Bold',
+        alignment=TA_LEFT
     )
     
-    subtitle_style = ParagraphStyle(
-        'CustomSubtitle',
+    company_info_style = ParagraphStyle(
+        'CompanyInfo',
         parent=styles['Normal'],
-        fontSize=10,
+        fontSize=9,
         textColor=COFFEE_MEDIUM,
-        spaceAfter=20,
-        alignment=TA_CENTER
+        leading=12,
+        alignment=TA_LEFT
     )
     
     heading_style = ParagraphStyle(
         'SectionHeading',
         parent=styles['Heading2'],
-        fontSize=12,
+        fontSize=11,
         textColor=HEADER_BG,
         spaceAfter=8,
-        spaceBefore=12,
-        fontName='Helvetica-Bold',
-        borderWidth=0,
-        borderColor=COFFEE_DARK,
-        borderPadding=5
-    )
-    
-    info_label_style = ParagraphStyle(
-        'InfoLabel',
-        parent=styles['Normal'],
-        fontSize=9,
-        textColor=COFFEE_MEDIUM,
+        spaceBefore=10,
         fontName='Helvetica-Bold'
     )
     
@@ -101,36 +88,53 @@ def generate_invoice_pdf(invoice_data: dict, company_settings: dict) -> str:
         'InfoValue',
         parent=styles['Normal'],
         fontSize=9,
-        textColor=colors.black
+        textColor=colors.black,
+        leading=12
     )
     
-    # Add logo and company header
+    # Header with logo in top-right corner
     logo_path = download_logo()
+    
+    header_data = []
     if logo_path and os.path.exists(logo_path):
         try:
-            logo = Image(logo_path, width=0.8*inch, height=0.8*inch)
-            logo.hAlign = 'CENTER'
-            story.append(logo)
-            story.append(Spacer(1, 0.1*inch))
-        except:
-            pass
+            logo = Image(logo_path, width=1*inch, height=1*inch)
+            
+            company_info_text = f"""
+            <b><font size=24 color=#3E2723>{company_settings.get('company_name', 'BigBeanCafe')}</font></b><br/>
+            {company_settings.get('company_address', 'Franchise Head Office, India')}<br/>
+            <b>Phone:</b> {company_settings.get('company_phone', '+91 1234567890')}<br/>
+            <b>Email:</b> {company_settings.get('company_email', 'info@bigbeancafe.in')}<br/>
+            <b>GSTIN:</b> {company_settings.get('company_gstin', '22AAAAA0000A1Z5')}
+            """
+            
+            header_data = [[
+                Paragraph(company_info_text, company_info_style),
+                logo
+            ]]
+            
+            header_table = Table(header_data, colWidths=[5.2*inch, 1.8*inch])
+            header_table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+                ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+            ]))
+            story.append(header_table)
+        except Exception as e:
+            print(f"Logo error: {e}")
+            # Fallback without logo
+            company_text = f"""
+            <b><font size=24 color=#3E2723>{company_settings.get('company_name', 'BigBeanCafe')}</font></b><br/>
+            {company_settings.get('company_address', 'Franchise Head Office, India')}<br/>
+            <b>Phone:</b> {company_settings.get('company_phone', '+91 1234567890')}<br/>
+            <b>Email:</b> {company_settings.get('company_email', 'info@bigbeancafe.in')}<br/>
+            <b>GSTIN:</b> {company_settings.get('company_gstin', '22AAAAA0000A1Z5')}
+            """
+            story.append(Paragraph(company_text, company_info_style))
     
-    # Company Name
-    story.append(Paragraph(company_settings.get('company_name', 'BigBeanCafe'), title_style))
+    story.append(Spacer(1, 0.2*inch))
     
-    # Company details
-    company_info = f"""
-    <para alignment="center">
-    {company_settings.get('company_address', 'Franchise Head Office, India')}<br/>
-    Phone: {company_settings.get('company_phone', '+91 1234567890')} | 
-    Email: {company_settings.get('company_email', 'info@bigbeancafe.in')}<br/>
-    <b>GSTIN:</b> {company_settings.get('company_gstin', '22AAAAA0000A1Z5')}
-    </para>
-    """
-    story.append(Paragraph(company_info, subtitle_style))
-    
-    # Horizontal line
-    story.append(Spacer(1, 0.1*inch))
+    # Divider line
     line_table = Table([['']], colWidths=[7*inch])
     line_table.setStyle(TableStyle([
         ('LINEABOVE', (0,0), (-1,0), 2, COFFEE_DARK),
@@ -138,23 +142,18 @@ def generate_invoice_pdf(invoice_data: dict, company_settings: dict) -> str:
     story.append(line_table)
     story.append(Spacer(1, 0.2*inch))
     
-    # Invoice header section
-    invoice_header = [
-        [
-            Paragraph('<font size=18 color=#6F4E37><b>TAX INVOICE</b></font>', styles['Normal']),
-            ''
-        ]
-    ]
-    invoice_header_table = Table(invoice_header, colWidths=[3.5*inch, 3.5*inch])
-    invoice_header_table.setStyle(TableStyle([
+    # Tax Invoice header
+    invoice_title = Paragraph('<font size=20 color=#6F4E37><b>TAX INVOICE</b></font>', styles['Normal'])
+    invoice_title_table = Table([[invoice_title]], colWidths=[7*inch])
+    invoice_title_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), CREAM),
-        ('PADDING', (0,0), (-1,-1), 10),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('PADDING', (0,0), (-1,-1), 12),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
     ]))
-    story.append(invoice_header_table)
+    story.append(invoice_title_table)
     story.append(Spacer(1, 0.15*inch))
     
-    # Invoice details and customer details in two columns
+    # Invoice and billing details
     invoice_date_formatted = invoice_data['invoice_date'].strftime('%d-%B-%Y')
     
     details_data = [
@@ -163,16 +162,16 @@ def generate_invoice_pdf(invoice_data: dict, company_settings: dict) -> str:
             Paragraph('<b>Bill To:</b>', heading_style)
         ],
         [
-            Paragraph(f"<b>Invoice No:</b> {invoice_data['invoice_number']}", info_value_style),
-            Paragraph(f"<b>{invoice_data['franchise_name']}</b>", info_value_style)
+            Paragraph(f"<b>Invoice No:</b><br/>{invoice_data['invoice_number']}", info_value_style),
+            Paragraph(f"<b>{invoice_data['franchise_name']}</b><br/>{invoice_data.get('franchise_address', '')}", info_value_style)
         ],
         [
-            Paragraph(f"<b>Invoice Date:</b> {invoice_date_formatted}", info_value_style),
-            Paragraph(f"{invoice_data.get('franchise_address', '')}", info_value_style)
-        ],
-        [
-            Paragraph(f"<b>Order ID:</b> {invoice_data['order_id'][:20]}...", info_value_style),
+            Paragraph(f"<b>Invoice Date:</b><br/>{invoice_date_formatted}", info_value_style),
             Paragraph(f"<b>GSTIN:</b> {invoice_data.get('franchise_gstin', 'N/A')}", info_value_style)
+        ],
+        [
+            Paragraph(f"<b>Order ID:</b><br/>{invoice_data['order_id'][:25]}...", info_value_style),
+            ''
         ]
     ]
     
@@ -180,31 +179,31 @@ def generate_invoice_pdf(invoice_data: dict, company_settings: dict) -> str:
     details_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (0,0), COFFEE_LIGHT),
         ('BACKGROUND', (1,0), (1,0), COFFEE_LIGHT),
-        ('PADDING', (0,0), (-1,-1), 8),
+        ('PADDING', (0,0), (-1,-1), 10),
         ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('BOX', (0,0), (-1,-1), 1, COFFEE_LIGHT),
-        ('GRID', (0,1), (-1,-1), 0.5, COFFEE_LIGHT),
+        ('BOX', (0,0), (-1,-1), 1.5, COFFEE_DARK),
+        ('INNERGRID', (0,1), (-1,-1), 0.5, COFFEE_LIGHT),
     ]))
     story.append(details_table)
     story.append(Spacer(1, 0.25*inch))
     
-    # Items table header
+    # Order details heading
     story.append(Paragraph('<b>Order Details:</b>', heading_style))
-    story.append(Spacer(1, 0.1*inch))
+    story.append(Spacer(1, 0.08*inch))
     
-    # Items Table with SGST/CGST
+    # Items table with SGST/CGST
     table_data = [
         [
-            Paragraph('<b>#</b>', info_label_style),
-            Paragraph('<b>Product Description</b>', info_label_style),
-            Paragraph('<b>Qty</b>', info_label_style),
-            Paragraph('<b>Rate (₹)</b>', info_label_style),
-            Paragraph('<b>Taxable Amt (₹)</b>', info_label_style),
-            Paragraph('<b>SGST (%)</b>', info_label_style),
-            Paragraph('<b>SGST (₹)</b>', info_label_style),
-            Paragraph('<b>CGST (%)</b>', info_label_style),
-            Paragraph('<b>CGST (₹)</b>', info_label_style),
-            Paragraph('<b>Total (₹)</b>', info_label_style)
+            Paragraph('<b>#</b>', info_value_style),
+            Paragraph('<b>Product</b>', info_value_style),
+            Paragraph('<b>Qty</b>', info_value_style),
+            Paragraph('<b>Rate<br/>(₹)</b>', info_value_style),
+            Paragraph('<b>Taxable<br/>(₹)</b>', info_value_style),
+            Paragraph('<b>SGST<br/>%</b>', info_value_style),
+            Paragraph('<b>SGST<br/>(₹)</b>', info_value_style),
+            Paragraph('<b>CGST<br/>%</b>', info_value_style),
+            Paragraph('<b>CGST<br/>(₹)</b>', info_value_style),
+            Paragraph('<b>Total<br/>(₹)</b>', info_value_style)
         ]
     ]
     
@@ -220,174 +219,139 @@ def generate_invoice_pdf(invoice_data: dict, company_settings: dict) -> str:
             Paragraph(str(item['quantity']), info_value_style),
             Paragraph(f"{item['unit_price']:.2f}", info_value_style),
             Paragraph(f"{item['taxable_amount']:.2f}", info_value_style),
-            Paragraph(f"{sgst_percent:.1f}%", info_value_style),
+            Paragraph(f"{sgst_percent:.1f}", info_value_style),
             Paragraph(f"{sgst_amount:.2f}", info_value_style),
-            Paragraph(f"{cgst_percent:.1f}%", info_value_style),
+            Paragraph(f"{cgst_percent:.1f}", info_value_style),
             Paragraph(f"{cgst_amount:.2f}", info_value_style),
             Paragraph(f"<b>{item['total_amount']:.2f}</b>", info_value_style)
         ])
     
-    # Create table with column widths
-    col_widths = [0.3*inch, 2*inch, 0.4*inch, 0.6*inch, 0.8*inch, 0.5*inch, 0.6*inch, 0.5*inch, 0.6*inch, 0.7*inch]
+    col_widths = [0.3*inch, 2.1*inch, 0.4*inch, 0.6*inch, 0.75*inch, 0.45*inch, 0.6*inch, 0.45*inch, 0.6*inch, 0.75*inch]
     
     table = Table(table_data, colWidths=col_widths, repeatRows=1)
     table.setStyle(TableStyle([
-        # Header styling
         ('BACKGROUND', (0, 0), (-1, 0), HEADER_BG),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-        ('TOPPADDING', (0, 0), (-1, 0), 10),
+        ('PADDING', (0, 0), (-1, 0), 8),
         
-        # Data rows
         ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-        ('ALIGN', (0, 1), (0, -1), 'CENTER'),  # Serial number
-        ('ALIGN', (2, 1), (-1, -1), 'CENTER'),  # Numbers aligned center
-        ('ALIGN', (1, 1), (1, -1), 'LEFT'),  # Product name left
+        ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+        ('ALIGN', (2, 1), (-1, -1), 'CENTER'),
+        ('ALIGN', (1, 1), (1, -1), 'LEFT'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 8),
         ('PADDING', (0, 1), (-1, -1), 6),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, CREAM]),
         
-        # Grid
         ('GRID', (0, 0), (-1, -1), 0.5, COFFEE_MEDIUM),
         ('BOX', (0, 0), (-1, -1), 1.5, COFFEE_DARK),
-        
-        # Valign
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
     
     story.append(table)
     story.append(Spacer(1, 0.2*inch))
     
-    # Totals section
+    # Totals
     sgst_total = invoice_data.get('sgst_total', invoice_data['gst_total'] / 2)
     cgst_total = invoice_data.get('cgst_total', invoice_data['gst_total'] / 2)
     
     totals_data = [
-        ['', 'Subtotal:', f"₹ {invoice_data['subtotal']:,.2f}"],
-        ['', 'SGST Total:', f"₹ {sgst_total:,.2f}"],
-        ['', 'CGST Total:', f"₹ {cgst_total:,.2f}"],
-        ['', 'Total Tax:', f"₹ {invoice_data['gst_total']:,.2f}"],
-        ['', 'Grand Total:', f"₹ {invoice_data['grand_total']:,.2f}"],
+        ['', '', 'Subtotal:', f"₹ {invoice_data['subtotal']:,.2f}"],
+        ['', '', 'SGST Total:', f"₹ {sgst_total:,.2f}"],
+        ['', '', 'CGST Total:', f"₹ {cgst_total:,.2f}"],
+        ['', '', 'Total Tax:', f"₹ {invoice_data['gst_total']:,.2f}"],
     ]
     
-    totals_table = Table(totals_data, colWidths=[3.8*inch, 1.8*inch, 1.4*inch])
+    totals_table = Table(totals_data, colWidths=[2.5*inch, 2.5*inch, 1.2*inch, 0.8*inch])
     totals_table.setStyle(TableStyle([
-        ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
         ('ALIGN', (2, 0), (2, -1), 'RIGHT'),
-        ('FONTNAME', (1, 0), (1, -2), 'Helvetica-Bold'),
-        ('FONTNAME', (1, -1), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (1, -1), (-1, -1), 12),
-        ('TEXTCOLOR', (1, -1), (-1, -1), COFFEE_DARK),
-        ('BACKGROUND', (1, -1), (-1, -1), CREAM),
-        ('PADDING', (1, 0), (-1, -1), 8),
-        ('LINEABOVE', (1, -1), (-1, -1), 2, COFFEE_DARK),
-        ('BOX', (1, 0), (-1, -1), 1, COFFEE_LIGHT),
+        ('ALIGN', (3, 0), (3, -1), 'RIGHT'),
+        ('FONTNAME', (2, 0), (-1, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (2, 0), (-1, -1), 9),
+        ('PADDING', (2, 0), (-1, -1), 5),
+        ('LINEABOVE', (2, -1), (-1, -1), 1, COFFEE_LIGHT),
     ]))
-    
     story.append(totals_table)
-    story.append(Spacer(1, 0.3*inch))
+    
+    # Grand Total
+    grand_total_data = [['', '', 'GRAND TOTAL:', f"₹ {invoice_data['grand_total']:,.2f}"]]
+    grand_total_table = Table(grand_total_data, colWidths=[2.5*inch, 2.5*inch, 1.2*inch, 0.8*inch])
+    grand_total_table.setStyle(TableStyle([
+        ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
+        ('FONTNAME', (2, 0), (-1, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (2, 0), (-1, -1), 12),
+        ('TEXTCOLOR', (2, 0), (-1, -1), COFFEE_DARK),
+        ('BACKGROUND', (2, 0), (-1, -1), CREAM),
+        ('PADDING', (2, 0), (-1, -1), 10),
+        ('BOX', (2, 0), (-1, -1), 2, COFFEE_DARK),
+    ]))
+    story.append(grand_total_table)
+    story.append(Spacer(1, 0.15*inch))
     
     # Amount in words
     amount_words = number_to_words(invoice_data['grand_total'])
-    story.append(Paragraph(f'<b>Amount in Words:</b> {amount_words}', info_value_style))
-    story.append(Spacer(1, 0.3*inch))
+    story.append(Paragraph(f'<b>Amount in Words:</b> <i>{amount_words}</i>', info_value_style))
+    story.append(Spacer(1, 0.25*inch))
     
-    # Terms and conditions
-    terms_style = ParagraphStyle(
-        'Terms',
-        parent=styles['Normal'],
-        fontSize=8,
-        textColor=colors.grey,
-        leading=12
-    )
-    
+    # Terms
+    terms_style = ParagraphStyle('Terms', parent=styles['Normal'], fontSize=7.5, textColor=colors.grey, leading=10)
     story.append(Paragraph('<b>Terms & Conditions:</b>', heading_style))
     terms = """
-    1. This is a computer-generated invoice and does not require a physical signature.<br/>
-    2. Credit amount has been deducted from your available credit limit upon order approval.<br/>
-    3. Payment is due when credit limit is exhausted. Fixed payment amount: ₹1,00,000.<br/>
-    4. All disputes are subject to jurisdiction at the company's registered office location.<br/>
-    5. Goods once sold will not be taken back or exchanged.<br/>
+    1. This is a computer-generated invoice and does not require a physical signature. 
+    2. Credit deducted upon order approval. Payment due when credit exhausted (₹1,00,000 fixed). 
+    3. All disputes subject to company jurisdiction. Goods once sold not returnable.
     """
     story.append(Paragraph(terms, terms_style))
-    story.append(Spacer(1, 0.3*inch))
-    
-    # Footer with branding
-    footer_style = ParagraphStyle(
-        'Footer',
-        parent=styles['Normal'],
-        fontSize=8,
-        textColor=COFFEE_MEDIUM,
-        alignment=TA_CENTER
-    )
-    
     story.append(Spacer(1, 0.2*inch))
-    footer_line = Table([['']], colWidths=[7*inch])
-    footer_line.setStyle(TableStyle([
-        ('LINEABOVE', (0,0), (-1,0), 1, COFFEE_LIGHT),
-    ]))
-    story.append(footer_line)
-    story.append(Spacer(1, 0.1*inch))
     
+    # Footer
+    footer_line = Table([['']], colWidths=[7*inch])
+    footer_line.setStyle(TableStyle([('LINEABOVE', (0,0), (-1,0), 1, COFFEE_LIGHT)]))
+    story.append(footer_line)
+    story.append(Spacer(1, 0.08*inch))
+    
+    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=COFFEE_MEDIUM, alignment=TA_CENTER)
     footer_text = f"""
-    <para alignment="center">
     <b>Thank you for your business!</b><br/>
-    BigBeanCafe Franchise Ordering System | www.bigbeancafe.in<br/>
-    For any queries, contact: {company_settings.get('company_email', 'info@bigbeancafe.in')} | 
+    BigBeanCafe Franchise System | {company_settings.get('company_email', 'info@bigbeancafe.in')} | 
     {company_settings.get('company_phone', '+91 1234567890')}
-    </para>
     """
     story.append(Paragraph(footer_text, footer_style))
     
-    # Build PDF
     doc.build(story)
-    
     return str(filepath)
 
 def number_to_words(num):
-    """Convert number to words (Indian system)"""
+    """Convert number to words"""
     try:
         num = float(num)
         rupees = int(num)
         paise = int(round((num - rupees) * 100))
         
-        def convert_to_words(n):
-            if n == 0:
-                return "Zero"
-            
+        def convert(n):
+            if n == 0: return "Zero"
             ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"]
             tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"]
             teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"]
             
-            if n < 10:
-                return ones[n]
-            elif n < 20:
-                return teens[n - 10]
-            elif n < 100:
-                return tens[n // 10] + (" " + ones[n % 10] if n % 10 != 0 else "")
-            elif n < 1000:
-                return ones[n // 100] + " Hundred" + (" and " + convert_to_words(n % 100) if n % 100 != 0 else "")
-            elif n < 100000:
-                return convert_to_words(n // 1000) + " Thousand" + (" " + convert_to_words(n % 1000) if n % 1000 != 0 else "")
-            elif n < 10000000:
-                return convert_to_words(n // 100000) + " Lakh" + (" " + convert_to_words(n % 100000) if n % 100000 != 0 else "")
-            else:
-                return convert_to_words(n // 10000000) + " Crore" + (" " + convert_to_words(n % 10000000) if n % 10000000 != 0 else "")
+            if n < 10: return ones[n]
+            elif n < 20: return teens[n - 10]
+            elif n < 100: return tens[n // 10] + (" " + ones[n % 10] if n % 10 != 0 else "")
+            elif n < 1000: return ones[n // 100] + " Hundred" + (" and " + convert(n % 100) if n % 100 != 0 else "")
+            elif n < 100000: return convert(n // 1000) + " Thousand" + (" " + convert(n % 1000) if n % 1000 != 0 else "")
+            elif n < 10000000: return convert(n // 100000) + " Lakh" + (" " + convert(n % 100000) if n % 100000 != 0 else "")
+            else: return convert(n // 10000000) + " Crore" + (" " + convert(n % 10000000) if n % 10000000 != 0 else "")
         
-        result = "Rupees " + convert_to_words(rupees)
+        result = "Rupees " + convert(rupees)
         if paise > 0:
-            result += " and " + convert_to_words(paise) + " Paise"
+            result += " and " + convert(paise) + " Paise"
         result += " Only"
         return result
     except:
         return "Amount conversion error"
 
 def get_next_invoice_number(year: int) -> str:
-    """
-    Generate next invoice number in format: YYYY-MMDDHHMMSS
-    """
     return f"{year}-{datetime.now().strftime('%m%d%H%M%S')}"
