@@ -151,7 +151,11 @@ class OrderItem(BaseModel):
     quantity: int
     unit_price: float
     gst_percent: float
+    sgst_percent: float
+    cgst_percent: float
     taxable_amount: float
+    sgst_amount: float
+    cgst_amount: float
     gst_amount: float
     total_amount: float
 
