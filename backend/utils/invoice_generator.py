@@ -77,7 +77,7 @@ def generate_invoice_pdf(invoice_data: dict, company_settings: dict) -> str:
     
     # Items Table
     table_data = [
-        ['#', 'Product', 'Qty', 'Rate', 'Taxable Amt', 'GST %', 'GST Amt', 'Total']
+        ['#', 'Product', 'Qty', 'Rate', 'Taxable', 'SGST%', 'SGST', 'CGST%', 'CGST', 'Total']
     ]
     
     for idx, item in enumerate(invoice_data['items'], 1):
@@ -87,18 +87,21 @@ def generate_invoice_pdf(invoice_data: dict, company_settings: dict) -> str:
             str(item['quantity']),
             f"₹{item['unit_price']:.2f}",
             f"₹{item['taxable_amount']:.2f}",
-            f"{item['gst_percent']}%",
-            f"₹{item['gst_amount']:.2f}",
+            f"{item.get('sgst_percent', item['gst_percent']/2):.1f}%",
+            f"₹{item.get('sgst_amount', item['gst_amount']/2):.2f}",
+            f"{item.get('cgst_percent', item['gst_percent']/2):.1f}%",
+            f"₹{item.get('cgst_amount', item['gst_amount']/2):.2f}",
             f"₹{item['total_amount']:.2f}"
         ])
     
     # Add totals
-    table_data.append(['', '', '', '', '', '<b>Subtotal</b>', '', f"<b>₹{invoice_data['subtotal']:.2f}</b>"])
-    table_data.append(['', '', '', '', '', '<b>GST Total</b>', '', f"<b>₹{invoice_data['gst_total']:.2f}</b>"])
-    table_data.append(['', '', '', '', '', '<b>Grand Total</b>', '', f"<b>₹{invoice_data['grand_total']:.2f}</b>"])
+    table_data.append(['', '', '', '', '<b>Subtotal</b>', '', '', '', '', f"<b>₹{invoice_data['subtotal']:.2f}</b>"])
+    table_data.append(['', '', '', '', '<b>SGST Total</b>', '', '', '', '', f"<b>₹{invoice_data.get('sgst_total', invoice_data['gst_total']/2):.2f}</b>"])
+    table_data.append(['', '', '', '', '<b>CGST Total</b>', '', '', '', '', f"<b>₹{invoice_data.get('cgst_total', invoice_data['gst_total']/2):.2f}</b>"])
+    table_data.append(['', '', '', '', '<b>Grand Total</b>', '', '', '', '', f"<b>₹{invoice_data['grand_total']:.2f}</b>"])
     
     # Create table
-    table = Table(table_data, colWidths=[0.4*inch, 2*inch, 0.6*inch, 0.8*inch, 1*inch, 0.7*inch, 0.9*inch, 1*inch])
+    table = Table(table_data, colWidths=[0.3*inch, 1.5*inch, 0.4*inch, 0.7*inch, 0.9*inch, 0.5*inch, 0.7*inch, 0.5*inch, 0.7*inch, 0.9*inch])
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498DB')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
