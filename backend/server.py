@@ -541,15 +541,21 @@ async def create_order(order_data: OrderCreate, current_user: dict = Depends(req
     # Calculate order totals
     order_items = []
     subtotal = 0
+    sgst_total = 0
+    cgst_total = 0
     gst_total = 0
     
     for cart_item in filtered_cart:
         quantity = cart_item["quantity"]
         unit_price = cart_item["unit_price"]
         gst_percent = cart_item["gst_percent"]
+        sgst_percent = gst_percent / 2
+        cgst_percent = gst_percent / 2
         
         taxable_amount = quantity * unit_price
         gst_amount = taxable_amount * (gst_percent / 100)
+        sgst_amount = taxable_amount * (sgst_percent / 100)
+        cgst_amount = taxable_amount * (cgst_percent / 100)
         total_amount = taxable_amount + gst_amount
         
         order_item = OrderItem(
@@ -558,13 +564,19 @@ async def create_order(order_data: OrderCreate, current_user: dict = Depends(req
             quantity=quantity,
             unit_price=unit_price,
             gst_percent=gst_percent,
+            sgst_percent=sgst_percent,
+            cgst_percent=cgst_percent,
             taxable_amount=taxable_amount,
+            sgst_amount=sgst_amount,
+            cgst_amount=cgst_amount,
             gst_amount=gst_amount,
             total_amount=total_amount
         )
         order_items.append(order_item)
         
         subtotal += taxable_amount
+        sgst_total += sgst_amount
+        cgst_total += cgst_amount
         gst_total += gst_amount
     
     grand_total = subtotal + gst_total
