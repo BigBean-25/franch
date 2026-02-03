@@ -687,6 +687,8 @@ async def approve_order(
         "franchise_gstin": franchise.get("gstin"),
         "items": order["items"],
         "subtotal": order["subtotal"],
+        "sgst_total": order.get("sgst_total", order["gst_total"] / 2),
+        "cgst_total": order.get("cgst_total", order["gst_total"] / 2),
         "gst_total": order["gst_total"],
         "grand_total": order["grand_total"],
         "invoice_date": datetime.now(timezone.utc)
