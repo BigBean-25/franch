@@ -704,7 +704,10 @@ async def approve_order(
         }
     
     invoice_path = generate_invoice_pdf(invoice_data, company_settings)
-    invoice_url = f"/api/invoices/{invoice_number}.pdf"
+    # Extract just the filename from the path
+    import os
+    invoice_filename = os.path.basename(invoice_path)
+    invoice_url = f"/api/invoices/{invoice_filename}"
     
     # Save invoice record
     invoice = Invoice(
