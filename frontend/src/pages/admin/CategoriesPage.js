@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
-import { LayoutDashboard, Users, Store, FolderOpen, Package, ShoppingCart, CreditCard, Settings, FileText, Bell, Plus, Edit, Trash2 } from 'lucide-react';
+import { LayoutDashboard, Users, Store, FolderOpen, Package, ShoppingCart, CreditCard, Settings, FileText, Bell, Plus, Edit, Trash2, ShoppingBag } from 'lucide-react';
 import api from '../../services/api';
 
 const CategoriesPage = () => {
