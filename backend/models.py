@@ -109,6 +109,8 @@ class Product(BaseModel):
     original_price: float
     offer_price: Optional[float] = None
     gst_percent: float = 18.0
+    sgst_percent: float = 9.0  # Half of GST
+    cgst_percent: float = 9.0  # Half of GST
     unit: str = "piece"
     image_url: Optional[str] = None
     is_active: bool = True
