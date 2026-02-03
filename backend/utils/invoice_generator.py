@@ -110,13 +110,14 @@ def generate_invoice_pdf(invoice_data: dict, company_settings: dict) -> str:
         ('FONTSIZE', (0, 0), (-1, 0), 10),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('BACKGROUND', (0, 1), (-1, -4), colors.beige),
-        ('GRID', (0, 0), (-1, -4), 1, colors.black),
-        ('BACKGROUND', (0, -3), (-1, -1), colors.HexColor('#ECF0F1')),
-        ('FONTNAME', (0, -3), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, -3), (-1, -1), 11),
-        ('SPAN', (0, -3), (5, -3)),
-        ('SPAN', (0, -2), (5, -2)),
-        ('SPAN', (0, -1), (5, -1)),
+        ('GRID', (0, 0), (-1, -5), 1, colors.black),
+        ('BACKGROUND', (0, -4), (-1, -1), colors.HexColor('#ECF0F1')),
+        ('FONTNAME', (0, -4), (-1, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, -4), (-1, -1), 11),
+        ('SPAN', (0, -4), (8, -4)),
+        ('SPAN', (0, -3), (8, -3)),
+        ('SPAN', (0, -2), (8, -2)),
+        ('SPAN', (0, -1), (8, -1)),
     ]))
     
     story.append(table)
