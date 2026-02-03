@@ -169,6 +169,8 @@ class Order(BaseModel):
     order_type: Literal["bakehouse", "merch"]
     items: List[OrderItem]
     subtotal: float
+    sgst_total: float
+    cgst_total: float
     gst_total: float
     grand_total: float
     status: Literal["pending", "approved", "rejected", "completed", "cancelled"] = "pending"
