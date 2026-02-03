@@ -1,1 +1,179 @@
-import React from 'react';\nimport { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';\nimport { AuthProvider, useAuth } from './context/AuthContext';\nimport LandingPage from './pages/LandingPage';\nimport SuperAdminDashboard from './pages/admin/SuperAdminDashboard';\nimport './App.css';\n\n// Protected Route Component\nconst ProtectedRoute = ({ children, allowedRoles }) => {\n  const { user, loading } = useAuth();\n\n  if (loading) {\n    return (\n      <div className=\"min-h-screen flex items-center justify-center\">\n        <div className=\"animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600\"></div>\n      </div>\n    );\n  }\n\n  if (!user) {\n    return <Navigate to=\"/\" replace />;\n  }\n\n  if (allowedRoles && !allowedRoles.includes(user.role)) {\n    return <Navigate to=\"/\" replace />;\n  }\n\n  return children;\n};\n\n// Placeholder components for routes (to be implemented)\nconst UsersPage = () => <div>Users Management - Coming Soon</div>;\nconst FranchisesPage = () => <div>Franchises Management - Coming Soon</div>;\nconst CategoriesPage = () => <div>Categories Management - Coming Soon</div>;\nconst ProductsPage = () => <div>Products Management - Coming Soon</div>;\nconst OrdersPage = () => <div>Orders Management - Coming Soon</div>;\nconst PaymentsPage = () => <div>Payments Management - Coming Soon</div>;\nconst ReportsPage = () => <div>Reports - Coming Soon</div>;\nconst NotificationsPage = () => <div>Notifications - Coming Soon</div>;\nconst SettingsPage = () => <div>Settings - Coming Soon</div>;\n\n// Franchise Portal Pages\nconst FranchisePortal = () => <div>Franchise Portal - Coming Soon</div>;\n\n// Bakehouse Admin Pages\nconst BakehouseAdmin = () => <div>Bakehouse Admin - Coming Soon</div>;\n\n// Merch Admin Pages\nconst MerchAdmin = () => <div>Merch Admin - Coming Soon</div>;\n\nfunction App() {\n  return (\n    <AuthProvider>\n      <BrowserRouter>\n        <Routes>\n          {/* Public Routes */}\n          <Route path=\"/\" element={<LandingPage />} />\n\n          {/* Super Admin Routes */}\n          <Route\n            path=\"/admin\"\n            element={\n              <ProtectedRoute allowedRoles={['super_admin']}>\n                <SuperAdminDashboard />\n              </ProtectedRoute>\n            }\n          />\n          <Route\n            path=\"/admin/users\"\n            element={\n              <ProtectedRoute allowedRoles={['super_admin']}>\n                <UsersPage />\n              </ProtectedRoute>\n            }\n          />\n          <Route\n            path=\"/admin/franchises\"\n            element={\n              <ProtectedRoute allowedRoles={['super_admin']}>\n                <FranchisesPage />\n              </ProtectedRoute>\n            }\n          />\n          <Route\n            path=\"/admin/categories\"\n            element={\n              <ProtectedRoute allowedRoles={['super_admin']}>\n                <CategoriesPage />\n              </ProtectedRoute>\n            }\n          />\n          <Route\n            path=\"/admin/products\"\n            element={\n              <ProtectedRoute allowedRoles={['super_admin']}>\n                <ProductsPage />\n              </ProtectedRoute>\n            }\n          />\n          <Route\n            path=\"/admin/orders\"\n            element={\n              <ProtectedRoute allowedRoles={['super_admin']}>\n                <OrdersPage />\n              </ProtectedRoute>\n            }\n          />\n          <Route\n            path=\"/admin/payments\"\n            element={\n              <ProtectedRoute allowedRoles={['super_admin']}>\n                <PaymentsPage />\n              </ProtectedRoute>\n            }\n          />\n          <Route\n            path=\"/admin/reports\"\n            element={\n              <ProtectedRoute allowedRoles={['super_admin']}>\n                <ReportsPage />\n              </ProtectedRoute>\n            }\n          />\n          <Route\n            path=\"/admin/notifications\"\n            element={\n              <ProtectedRoute allowedRoles={['super_admin']}>\n                <NotificationsPage />\n              </ProtectedRoute>\n            }\n          />\n          <Route\n            path=\"/admin/settings\"\n            element={\n              <ProtectedRoute allowedRoles={['super_admin']}>\n                <SettingsPage />\n              </ProtectedRoute>\n            }\n          />\n\n          {/* Franchise Portal Routes */}\n          <Route\n            path=\"/portal/*\"\n            element={\n              <ProtectedRoute allowedRoles={['franchise_admin']}>\n                <FranchisePortal />\n              </ProtectedRoute>\n            }\n          />\n\n          {/* Bakehouse Admin Routes */}\n          <Route\n            path=\"/bakehouse/*\"\n            element={\n              <ProtectedRoute allowedRoles={['bakehouse_admin']}>\n                <BakehouseAdmin />\n              </ProtectedRoute>\n            }\n          />\n\n          {/* Merch Admin Routes */}\n          <Route\n            path=\"/merch/*\"\n            element={\n              <ProtectedRoute allowedRoles={['merch_admin']}>\n                <MerchAdmin />\n              </ProtectedRoute>\n            }\n          />\n\n          {/* 404 */}\n          <Route path=\"*\" element={<Navigate to=\"/\" replace />} />\n        </Routes>\n      </BrowserRouter>\n    </AuthProvider>\n  );\n}\n\nexport default App;\n
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import LandingPage from './pages/LandingPage';
+import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
+import './App.css';
+
+// Protected Route Component
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+// Placeholder components for routes (to be implemented)
+const UsersPage = () => <div>Users Management - Coming Soon</div>;
+const FranchisesPage = () => <div>Franchises Management - Coming Soon</div>;
+const CategoriesPage = () => <div>Categories Management - Coming Soon</div>;
+const ProductsPage = () => <div>Products Management - Coming Soon</div>;
+const OrdersPage = () => <div>Orders Management - Coming Soon</div>;
+const PaymentsPage = () => <div>Payments Management - Coming Soon</div>;
+const ReportsPage = () => <div>Reports - Coming Soon</div>;
+const NotificationsPage = () => <div>Notifications - Coming Soon</div>;
+const SettingsPage = () => <div>Settings - Coming Soon</div>;
+
+// Franchise Portal Pages
+const FranchisePortal = () => <div>Franchise Portal - Coming Soon</div>;
+
+// Bakehouse Admin Pages
+const BakehouseAdmin = () => <div>Bakehouse Admin - Coming Soon</div>;
+
+// Merch Admin Pages
+const MerchAdmin = () => <div>Merch Admin - Coming Soon</div>;
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Super Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <SuperAdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <UsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/franchises"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <FranchisesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/categories"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/products"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <ProductsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/orders"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <OrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/payments"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <PaymentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reports"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <ReportsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/notifications"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/settings"
+            element={
+              <ProtectedRoute allowedRoles={['super_admin']}>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Franchise Portal Routes */}
+          <Route
+            path="/portal/*"
+            element={
+              <ProtectedRoute allowedRoles={['franchise_admin']}>
+                <FranchisePortal />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Bakehouse Admin Routes */}
+          <Route
+            path="/bakehouse/*"
+            element={
+              <ProtectedRoute allowedRoles={['bakehouse_admin']}>
+                <BakehouseAdmin />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Merch Admin Routes */}
+          <Route
+            path="/merch/*"
+            element={
+              <ProtectedRoute allowedRoles={['merch_admin']}>
+                <MerchAdmin />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 404 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
+
+export default App;
