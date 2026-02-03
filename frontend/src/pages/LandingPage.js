@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Coffee, User, ShoppingBag, Package } from 'lucide-react';
+import { User, ShoppingBag, Package, UserCog } from 'lucide-react';
+import Logo from '../components/Logo';
 
 const LandingPage = () => {
   const [selectedPortal, setSelectedPortal] = useState(null);
@@ -17,29 +18,29 @@ const LandingPage = () => {
       id: 'super_admin',
       title: 'Super Admin',
       description: 'Complete system management',
-      icon: User,
-      color: 'from-purple-600 to-purple-800',
+      icon: UserCog,
+      color: 'from-coffee-800 to-coffee-900',
     },
     {
       id: 'franchise_admin',
       title: 'Franchise Portal',
       description: 'Order products & manage franchise',
-      icon: Coffee,
-      color: 'from-blue-600 to-blue-800',
+      icon: User,
+      color: 'from-coffee-600 to-coffee-700',
     },
     {
       id: 'bakehouse_admin',
       title: 'Bakehouse Admin',
       description: 'Manage bakehouse products & orders',
       icon: Package,
-      color: 'from-orange-600 to-orange-800',
+      color: 'from-coffee-700 to-coffee-800',
     },
     {
       id: 'merch_admin',
       title: 'Merch Admin',
       description: 'Manage merchandise & orders',
       icon: ShoppingBag,
-      color: 'from-green-600 to-green-800',
+      color: 'from-coffee-600 to-coffee-800',
     },
   ];
 
@@ -51,7 +52,6 @@ const LandingPage = () => {
     try {
       const user = await login(email, password);
       
-      // Redirect based on role
       if (user.role === 'super_admin') {
         navigate('/admin');
       } else if (user.role === 'franchise_admin') {
@@ -69,26 +69,26 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-coffee-50 to-coffee-100">
       <header className="bg-white shadow-md">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-center">
-            <Coffee className="w-8 h-8 text-orange-600 mr-2" />
-            <h1 className="text-3xl font-bold text-gray-800">BigBeanCafe</h1>
+            <Logo className="w-12 h-12 mr-3" />
+            <div>
+              <h1 className="text-3xl font-bold text-coffee-900">BigBeanCafe</h1>
+              <p className="text-coffee-700 text-sm">Franchise Ordering System</p>
+            </div>
           </div>
-          <p className="text-center text-gray-600 mt-1">Franchise Ordering System</p>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
         {!selectedPortal ? (
           <div>
-            <h2 className="text-4xl font-bold text-center mb-4 text-gray-800">
+            <h2 className="text-4xl font-bold text-center mb-4 text-coffee-900">
               Welcome to BigBeanCafe
             </h2>
-            <p className="text-center text-gray-600 mb-12 text-lg">
+            <p className="text-center text-coffee-700 mb-12 text-lg">
               Select your portal to get started
             </p>
 
@@ -129,7 +129,7 @@ const LandingPage = () => {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-coffee-800 mb-2">
                     Email Address
                   </label>
                   <input
@@ -137,14 +137,14 @@ const LandingPage = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     data-testid="email-input"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-coffee-200 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
                     placeholder="Enter your email"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-coffee-800 mb-2">
                     Password
                   </label>
                   <input
@@ -152,7 +152,7 @@ const LandingPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     data-testid="password-input"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-coffee-200 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
                     placeholder="Enter your password"
                     required
                   />
@@ -175,7 +175,7 @@ const LandingPage = () => {
                     setPassword('');
                     setError('');
                   }}
-                  className="w-full text-gray-600 py-2 hover:text-gray-800 transition-colors"
+                  className="w-full text-coffee-700 py-2 hover:text-coffee-900 transition-colors"
                 >
                   Back to Portal Selection
                 </button>
@@ -185,8 +185,7 @@ const LandingPage = () => {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-6 mt-12">
+      <footer className="bg-coffee-900 text-white py-6 mt-12">
         <div className="container mx-auto px-4 text-center">
           <p>&copy; 2025 BigBeanCafe. All rights reserved.</p>
         </div>
