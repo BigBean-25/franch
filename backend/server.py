@@ -803,7 +803,7 @@ async def reject_order(
     franchise = await db.franchises.find_one({"id": order["franchise_id"]})
     
     # Send notification
-    await notify_order_rejected(db, order, franchise["email"], remarks)
+    await notify_order_rejected(db, order, franchise["email"], remarks, franchise.get("phone"))
     
     # Audit log
     await log_audit(db, current_user["id"], current_user["email"], "REJECT_ORDER", "orders", f"Rejected order {order['order_number']}")
