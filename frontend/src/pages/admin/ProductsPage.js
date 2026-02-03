@@ -168,31 +168,41 @@ const ProductsPage = () => {
             {filteredProducts.map((product) => {
               const finalPrice = product.offer_price || product.original_price;
               return (
-                <div key={product.id} className="bg-white rounded-lg shadow p-4 border border-coffee-200">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className={`px-2 py-1 text-xs rounded-full ${product.category_type === 'bakehouse' ? 'bg-coffee-200 text-coffee-900' : 'bg-green-200 text-green-900'}`}>
-                      {product.category_type}
-                    </span>
-                    <div className="flex gap-1">
-                      <button onClick={() => openEditModal(product)} className="text-coffee-600 hover:text-coffee-800">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-800">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                <div key={product.id} className="bg-white rounded-lg shadow overflow-hidden border border-coffee-200">
+                  {product.image_url && (
+                    <img 
+                      src={product.image_url} 
+                      alt={product.name} 
+                      className="w-full h-40 object-cover" 
+                      onError={(e) => {e.target.style.display='none'}}
+                    />
+                  )}
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className={`px-2 py-1 text-xs rounded-full ${product.category_type === 'bakehouse' ? 'bg-coffee-200 text-coffee-900' : 'bg-green-200 text-green-900'}`}>
+                        {product.category_type}
+                      </span>
+                      <div className="flex gap-1">
+                        <button onClick={() => openEditModal(product)} className="text-coffee-600 hover:text-coffee-800">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-800">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <h3 className="text-lg font-bold text-coffee-900 mb-1">{product.name}</h3>
-                  <p className="text-sm text-coffee-700 mb-2">{product.description}</p>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-coffee-700 text-sm">
-                        {product.offer_price && (
-                          <span className="line-through mr-2">₹{product.original_price}</span>
-                        )}
-                        <span className="text-lg font-bold text-coffee-900">₹{finalPrice}</span>
-                      </p>
-                      <p className="text-xs text-coffee-600">GST: {product.gst_percent}%</p>
+                    <h3 className="text-lg font-bold text-coffee-900 mb-1">{product.name}</h3>
+                    <p className="text-sm text-coffee-700 mb-2 line-clamp-2">{product.description}</p>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-coffee-700 text-sm">
+                          {product.offer_price && (
+                            <span className="line-through mr-2">₹{product.original_price}</span>
+                          )}
+                          <span className="text-lg font-bold text-coffee-900">₹{finalPrice}</span>
+                        </p>
+                        <p className="text-xs text-coffee-600">GST: {product.gst_percent}%</p>
+                      </div>
                     </div>
                   </div>
                 </div>
