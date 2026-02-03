@@ -68,26 +68,36 @@ const BrowseProductsPage = () => {
             {filteredProducts.map((product) => {
               const finalPrice = product.offer_price || product.original_price;
               return (
-                <div key={product.id} className="bg-white rounded-lg shadow p-6 border border-coffee-200">
-                  <span className={`px-2 py-1 text-xs rounded-full ${product.category_type === 'bakehouse' ? 'bg-coffee-200 text-coffee-900' : 'bg-green-200 text-green-900'}`}>
-                    {product.category_type}
-                  </span>
-                  <h3 className="text-xl font-bold text-coffee-900 mt-3">{product.name}</h3>
-                  <p className="text-sm text-coffee-700 mt-2">{product.description}</p>
-                  <div className="mt-4">
-                    {product.offer_price && (
-                      <p className="text-sm text-gray-500 line-through">₹{product.original_price}</p>
-                    )}
-                    <p className="text-2xl font-bold text-coffee-900">₹{finalPrice}</p>
-                    <p className="text-xs text-coffee-600">+ {product.gst_percent}% GST</p>
+                <div key={product.id} className="bg-white rounded-lg shadow overflow-hidden border border-coffee-200">
+                  {product.image_url && (
+                    <img 
+                      src={product.image_url} 
+                      alt={product.name} 
+                      className="w-full h-48 object-cover" 
+                      onError={(e) => {e.target.style.display='none'}}
+                    />
+                  )}
+                  <div className="p-6">
+                    <span className={`px-2 py-1 text-xs rounded-full ${product.category_type === 'bakehouse' ? 'bg-coffee-200 text-coffee-900' : 'bg-green-200 text-green-900'}`}>
+                      {product.category_type}
+                    </span>
+                    <h3 className="text-xl font-bold text-coffee-900 mt-3">{product.name}</h3>
+                    <p className="text-sm text-coffee-700 mt-2 line-clamp-2">{product.description}</p>
+                    <div className="mt-4">
+                      {product.offer_price && (
+                        <p className="text-sm text-gray-500 line-through">₹{product.original_price}</p>
+                      )}
+                      <p className="text-2xl font-bold text-coffee-900">₹{finalPrice}</p>
+                      <p className="text-xs text-coffee-600">+ {product.gst_percent}% GST (incl. SGST+CGST)</p>
+                    </div>
+                    <button
+                      onClick={() => addToCart(product.id)}
+                      className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-coffee-700 text-white rounded-lg hover:bg-coffee-800"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add to Cart
+                    </button>
                   </div>
-                  <button
-                    onClick={() => addToCart(product.id)}
-                    className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-coffee-700 text-white rounded-lg hover:bg-coffee-800"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add to Cart
-                  </button>
                 </div>
               );
             })}
