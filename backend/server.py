@@ -617,7 +617,7 @@ async def create_order(order_data: OrderCreate, current_user: dict = Depends(req
     await db.cart_items.delete_many({"user_id": current_user["id"]})
     
     # Send notification
-    await notify_order_placed(db, doc, franchise["email"])
+    await notify_order_placed(db, doc, franchise["email"], franchise.get("phone"))
     
     # Audit log
     await log_audit(db, current_user["id"], current_user["email"], "CREATE_ORDER", "orders", f"Created order {order_number}")
