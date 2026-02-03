@@ -942,7 +942,7 @@ async def verify_payment(
     await db.credit_ledger.insert_one(ledger_doc)
     
     # Send notification
-    await notify_payment_success(db, payment, franchise["email"])
+    await notify_payment_success(db, payment, franchise["email"], franchise.get("phone"))
     
     # Audit log
     await log_audit(db, current_user["id"], current_user["email"], "PAYMENT_SUCCESS", "payments", f"Payment successful - Credit reset")
